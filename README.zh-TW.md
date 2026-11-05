@@ -20,8 +20,8 @@
 
 | 指令 | 做什麼 |
 |---|---|
-| 封存：第 1 級（DOM＋內部資料） | 下載匯出檔。快（YouTube 首頁約 0.3 秒、十幾 MB） |
-| 封存：第 1＋2 級（加 computed style、位置） | 再加上每個元素的 computed style、`::before`／`::after`、位置大小。很慢（YouTube 首頁約 15～20 秒、上百 MB），頁面會卡住 |
+| 封存：第 1 級（DOM＋內部資料） | 下載匯出檔。登入的 YouTube 首頁實測約 13 秒、75 MB（約 1.5 萬個節點），頁面會卡住 |
+| 封存：第 1＋2 級（加 computed style、位置） | 再加上每個元素的 computed style、`::before`／`::after`、位置大小。比第 1 級再慢很多（未登入的 YouTube 首頁約 4 千個節點就要 15～20 秒、上百 MB） |
 | ● 開始錄製／■ 停止錄製 | 第 3 級：記錄網路、console、錯誤、元素變更；錄製中註冊的監聽器會附註冊時的呼叫堆疊。同一個分頁重新整理後會繼續錄 |
 | 清空錄製內容 | 清掉已錄的紀錄 |
 | 把這個網站加入／移出排除名單 | 網站被封存器弄壞時用。排除的網站不安裝任何包裝（第 1、2 級照樣可用），重新整理後生效 |
@@ -83,7 +83,7 @@ const w = typeof unsafeWindow !== 'undefined' ? unsafeWindow : window;
 
 ## 瀏覽器
 
-寫法同時支援 Chrome 與 Firefox；自動測試只在 Chromium 上跑。網站的 CSP 擋住注入、Tampermonkey 改用隔離沙箱時，Firefox 的包裝會經過 `exportFunction`——這條路徑還沒有實機驗證。
+寫法同時支援 Chrome 與 Firefox；自動測試只在 Chromium 上跑。網站的 CSP 擋住注入、Tampermonkey 改用隔離沙箱時（匯出檔的 `env.context` 是 `isolated`），Firefox 的包裝會經過 `exportFunction`。這條路徑在 Firefox 153 的 YouTube 首頁實機跑過一次：監聽器、closed shadow root 都抓得到，封存器自身零錯誤（2026-11-06）。
 
 ## 開發
 

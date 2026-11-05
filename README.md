@@ -20,8 +20,8 @@ From the Tampermonkey menu:
 
 | Command | What it does |
 |---|---|
-| 封存：第 1 級 (Dump: tier 1) | Downloads the export. Fast (YouTube home: about 0.3 s, a dozen MB) |
-| 封存：第 1＋2 級 (Dump: tiers 1+2) | Adds every element's computed style, `::before`/`::after` and box. Slow (YouTube home: 15–20 s, over 100 MB); the page freezes meanwhile |
+| 封存：第 1 級 (Dump: tier 1) | Downloads the export. Measured on a signed-in YouTube home page: about 13 s and 75 MB (about 15,000 nodes); the page freezes meanwhile |
+| 封存：第 1＋2 級 (Dump: tiers 1+2) | Adds every element's computed style, `::before`/`::after` and box. Much slower than tier 1 (a signed-out YouTube home page with about 4,000 nodes already takes 15–20 s and over 100 MB) |
 | ● 開始錄製 / ■ 停止錄製 (Start / stop recording) | Tier 3: records network, console, errors and mutations; listeners registered while recording carry their registration call stack. Survives reloads in the same tab |
 | 清空錄製內容 (Clear recording) | Discards recorded entries |
 | Add / remove this site to the exclude list | Use when the recorder breaks a site. Excluded sites get no hooks at all (tiers 1 and 2 still work); takes effect after reload |
@@ -83,7 +83,7 @@ Serialization has **no depth limit**; cycles resolve to `$ref`. The only limit i
 
 ## Browsers
 
-Written for both Chrome and Firefox; automated tests run on Chromium only. When a site's CSP blocks page-context injection and Tampermonkey falls back to an isolated sandbox, Firefox hooks go through `exportFunction` — that path has not been verified on a real browser yet.
+Written for both Chrome and Firefox; automated tests run on Chromium only. When a site's CSP blocks page-context injection and Tampermonkey falls back to an isolated sandbox (the export's `env.context` is `isolated`), Firefox hooks go through `exportFunction`. That path has been run once on a real Firefox 153 on the YouTube home page: listeners and closed shadow roots were captured and the recorder reported no errors of its own (2026-11-06).
 
 ## Development
 

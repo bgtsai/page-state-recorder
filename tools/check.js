@@ -8,7 +8,7 @@ const acorn = require('acorn');
 
 const file = process.argv[2] || path.join(__dirname, '..', 'page-state-recorder.user.js');
 const src = fs.readFileSync(file, 'utf8');
-const GM_GLOBALS = ['unsafeWindow', 'GM_info', 'GM_getValue', 'GM_setValue', 'GM_registerMenuCommand', 'GM_unregisterMenuCommand', 'exportFunction', 'cloneInto', 'createObjectIn'];
+const GM_GLOBALS = ['unsafeWindow', 'GM_info', 'GM_getValue', 'GM_setValue', 'GM_registerMenuCommand', 'GM_unregisterMenuCommand', 'exportFunction', 'cloneInto', 'createObjectIn', 'GM_xmlhttpRequest', 'GM_addStyle', 'GM_deleteValue', 'GM_listValues', 'GM_download', 'GM_openInTab', 'GM_setClipboard', 'GM_notification', 'GM'];
 
 let failed = false;
 const report = (name, ok, detail) => { console.log((ok ? 'OK   ' : 'FAIL ') + name + (detail ? '  ' + detail : '')); if (!ok) failed = true; };
