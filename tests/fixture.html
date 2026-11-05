@@ -1,0 +1,64 @@
+<!doctype html>
+<html lang="zh-TW">
+<head>
+<meta charset="utf-8">
+<title>PSR 測試頁</title>
+<style>
+  .icon::before { content: "\2665"; font-family: monospace; color: red; }
+  #styled { color: rgb(10, 20, 30); }
+</style>
+<script>
+  // 模擬 YouTube 的 custom elements polyfill：內建原型的 constructor 被換成非原生函式
+  HTMLElement.prototype.constructor = function HTMLElement() {};
+  // 自訂元素：open shadow ＋ 類別 getter 回傳深層、含循環的資料（測「不設深度上限」與 $ref）
+  class XCard extends HTMLElement {
+    constructor() {
+      super();
+      this.__data = { title: '卡片標題', badgeStyle: 'BADGE_STYLE_TYPE_LIVE' };
+      const root = this.attachShadow({ mode: 'open' });
+      root.innerHTML = '<span class="inner">shadow 內文</span><x-nested></x-nested>';
+      let deep = { leaf: 'DEEP_LEAF_VALUE' };
+      for (let i = 0; i < 12; i++) deep = { level: 12 - i, child: deep };
+      this._deep = deep;
+      this._self = { owner: this };
+      this._self.again = this._self; // 循環
+    }
+    get data() { return { deep: this._deep, cyc: this._self, list: [1, 'two', null, undefined, 3n] }; }
+    get explodes() { throw new Error('getter 故意拋例外'); }
+  }
+  customElements.define('x-card', XCard);
+  // 巢狀 shadow
+  customElements.define('x-nested', class extends HTMLElement {
+    constructor() { super(); this.attachShadow({ mode: 'open' }).innerHTML = '<b class="nested-leaf">巢狀葉子</b>'; }
+  });
+  // closed shadow：只有攔截 attachShadow 才拿得到
+  customElements.define('x-secret', class extends HTMLElement {
+    constructor() { super(); this.attachShadow({ mode: 'closed' }).innerHTML = '<i class="closed-leaf">CLOSED_CONTENT</i>'; }
+  });
+  (window.__diagQueue = window.__diagQueue || []).push(['測試腳本', () => ({ manuallyRemovedIds: ['a1', 'b2'], verdicts: [{ i: 1, rule: 'dedupe' }] })]);
+  (window.__diagQueue = window.__diagQueue || []).push(['壞掉的腳本', () => { throw new Error('diag 故意失敗'); }]);
+</script>
+</head>
+<body>
+  <x-card id="card1"></x-card>
+  <x-secret id="sec"></x-secret>
+  <svg id="svg1" width="20" height="20" viewBox="0 0 20 20"><path id="p1" d="M2 2 L18 2 L10 18 Z"/></svg>
+  <img id="bin" alt="">
+  <img id="svgimg" alt="">
+  <div id="styled" style="width: 100px !important; height: 20px">inline</div>
+  <span class="icon" id="heart"></span>
+  <button id="btn">按我</button>
+  <template id="tpl"><p class="in-template">樣板內容</p></template>
+  <script>
+    // 大塊二進位 data:（要換成描述）與大塊 svg data:（要原樣保留）
+    document.getElementById('bin').src = 'data:image/png;base64,' + 'A'.repeat(5000);
+    document.getElementById('svgimg').src = 'data:image/svg+xml,' + encodeURIComponent('<svg xmlns="http://www.w3.org/2000/svg">' + '<path d="M0 0L1 1"/>'.repeat(200) + '</svg>');
+    const btn = document.getElementById('btn');
+    function namedClickHandler(e) { return 'clicked'; }
+    btn.addEventListener('click', namedClickHandler, { capture: true, passive: true });
+    btn.addEventListener('click', namedClickHandler, { capture: true }); // 重複註冊，瀏覽器會忽略
+    btn.onmouseover = function hoverProp() {};
+    window.addEventListener('resize', function onResize() {});
+  </script>
+</body>
+</html>
